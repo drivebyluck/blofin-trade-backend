@@ -1,43 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const app = express();
+const PORT = process.env.PORT || 10000;
+
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-app.post('/trade', async (req, res) => {
-  const { apiKey, secretKey, passphrase, order } = req.body;
+// Logging incoming requests for debug
+app.post("/trade", (req, res) => {
+  const { apiKey, secretKey } = req.body;
 
-  // Validate payload
-  if (!apiKey || !secretKey || !order) {
-    return res.status(400).json({ error: 'Missing required data' });
-  }
+  console.log("Received API Key:", apiKey);
+  console.log("Received Secret Key:", secretKey);
 
-  // Debugging logs
-  console.log('Received /trade request');
-  console.log('Order:', order);
-  console.log('API Key:', apiKey);
-  console.log('Preparing to send request to Blofin...');
-
-  try {
-    const result = await axios.post('https://api.blofin.com/v1/order', order, {
-      headers: {
-        'X-BLOFIN-APIKEY': apiKey,
-        'X-BLOFIN-SECRETKEY': secretKey,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('Blofin response:', result.data);
-    res.json(result.data);
-  } catch (error) {
-    const errData = error.response?.data || error.message;
-    console.error('❌ Blofin API error:', errData);
-    res.status(500).json({ error: 'Trade failed', details: errData });
-  }
-});
-
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`✅ Blofin backend running on port ${PORT}`));
+  if (!apiKey || !secretKey) {
+    console.error("Missing required data.");
+    return res.status(400
