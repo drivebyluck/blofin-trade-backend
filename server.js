@@ -15,7 +15,12 @@ app.post('/trade', async (req, res) => {
     return res.status(400).json({ error: 'Missing required data' });
   }
 
-  // Prepare request to Blofin
+  // Debugging logs
+  console.log('Received /trade request');
+  console.log('Order:', order);
+  console.log('API Key:', apiKey);
+  console.log('Preparing to send request to Blofin...');
+
   try {
     const result = await axios.post('https://api.blofin.com/v1/order', order, {
       headers: {
@@ -25,12 +30,14 @@ app.post('/trade', async (req, res) => {
       }
     });
 
+    console.log('Blofin response:', result.data);
     res.json(result.data);
   } catch (error) {
-    console.error('Blofin API error:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Trade failed', details: error.response?.data || error.message });
+    const errData = error.response?.data || error.message;
+    console.error('❌ Blofin API error:', errData);
+    res.status(500).json({ error: 'Trade failed', details: errData });
   }
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`Blofin backend running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Blofin backend running on port ${PORT}`));
